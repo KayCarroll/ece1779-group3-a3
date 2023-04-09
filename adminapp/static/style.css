@@ -1,0 +1,45 @@
+.portalheader {
+    text-align: center;
+}
+
+.topnavbar {
+    background-color: #7b7b7b;
+    overflow: hidden;
+}
+
+.topnavbar a {
+    float: left;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+}
+
+.topnavbar a:hover {
+    background-color: #ddd;
+    color: black;
+}
+
+.topnavbar a.active {
+    background-color: #0446aa;
+    color: white;
+}
+
+.container {
+    width: 40%;
+}
+
+.votetimes {
+    display: flex;
+    margin-top: 50px;
+}
+
+.votetimes div {
+    padding-right: 20px;
+}
+
+.submitbutton {
+    margin-top: 50px;
+    float: right;
+}

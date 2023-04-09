@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Voting Admin Portal</title>
+</head>
+
+<body>
+    <div class="portalheader">
+        <h1>Voting App Administration Portal</h1>
+    </div>
+    <!-- <h2>Voting App Administration Portal</h2> -->
+    <div class="topnavbar">
+        <a href="home"><i class="fa fa-home"></i></a>
+        <a href="current">Current Vote</a>
+        <a class="active" href="create">New Vote</a>
+        <!-- <a href="future">Scheduled Votes</a> -->
+        <!-- <a href="past">Past Votes</a> -->
+    </div>
+
+    <div class="container">
+        <h2>Create a new vote</h2>
+        <form>
+            <table>
+                <tr>
+                    <th>
+                        Candidate #
+                    </th>
+                    <th>
+                        Surname
+                    </th>
+                    <th>
+                        Given Name(s)
+                    </th>
+                    <th>
+                        Association
+                    </th>
+                </tr>
+                <script type="text/javascript">
+                    for (var row = 1; row < 6; row++) {
+                        document.write("<tr><td>" + row + "</td>")
+                        for (var col = 1; col < 4; col++) {
+                            document.write("<td><input type=\"text\"></td>")
+                        }
+                        document.write("</tr>")
+                    }
+                </script>
+            </table>
+            <div class="votetimes">
+                <!-- <div>
+                    <label for="starttime">Vote Start:</label>
+                    <input type="datetime-local" name="starttime">
+                </div> -->
+                <div>
+                    <label for="endtime">Vote End:</label>
+                    <input type="datetime-local" name="endtime">
+                </div>
+            </div>
+            <input type="submit" class="submitbutton" id="startvote" value="Start Vote">
+
+        </form>
+    </div>
+
+</body>
+
+</html>
