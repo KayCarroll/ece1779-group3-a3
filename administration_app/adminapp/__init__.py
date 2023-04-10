@@ -1,6 +1,5 @@
-# import atexit
+import atexit
 import boto3
-# import json
 import logging
 
 from flask import Flask
@@ -19,5 +18,11 @@ dynamodb_client = boto3.client('dynamodb', region_name=AWS_REGION_NAME)
 
 app = Flask(__name__)
 
-# atexit.register(lambda: scheduler.shutdown(wait=False))
+
+def close_client():
+    dynamodb_client.close()
+    logger.info(f'Closed DynamoDB client')
+
+
+atexit.register(close_client)
 from adminapp import main

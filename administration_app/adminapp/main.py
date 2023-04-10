@@ -1,9 +1,8 @@
 import json
 import logging
 
-from boto3.dynamodb.conditions import Key
 from datetime import datetime, timedelta
-from flask import redirect, render_template, url_for, request, g
+from flask import redirect, render_template, url_for, request
 
 from adminapp import app, dynamodb_client
 from adminapp.constants import LOG_FORMAT, TIME_FORMAT, VOTING_INFO_TABLE
