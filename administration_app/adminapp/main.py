@@ -73,7 +73,14 @@ def current():
 
 @app.route('/end_current_vote', methods=['POST'])
 def end_current_vote():
-    logger.debug(f'End current vote: {request.form["votename"]}')
+    election_name = request.form["votename"]
+    end_time = datetime.utcnow().strftime(TIME_FORMAT)
+    response = dynamodb_client.update_item(TableName=VOTING_INFO_TABLE,
+                                           Key={'election_name': {'S': election_name}},
+                                           ExpressionAttributeValues={':et': {'S': end_time},
+                                                                      ':ca': {'S': 'False'}},
+                                           UpdateExpression=f'SET end_time = :et, currently_active = :ca')
+    logger.debug(f'Ended current vote: {election_name} at {end_time}')
     return redirect(url_for('current'))
 
 
