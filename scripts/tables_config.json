@@ -1,0 +1,59 @@
+[
+    {
+        "TableName": "Candidate_Votes",
+        "KeySchema": [
+            {
+                "AttributeName": "candidate_name",
+                "KeyType": "HASH"
+            }
+        ],
+        "AttributeDefinitions": [
+            {
+                "AttributeName": "candidate_name",
+                "AttributeType": "S"
+            }
+        ],
+        "ProvisionedThroughput": {
+            "ReadCapacityUnits": 10,
+            "WriteCapacityUnits": 10
+        }
+    },
+    {
+        "TableName": "voter_data",
+        "KeySchema": [
+            {
+                "AttributeName": "voter_name",
+                "KeyType": "HASH"
+            }
+        ],
+        "AttributeDefinitions": [
+            {
+                "AttributeName": "voter_name",
+                "AttributeType": "S"
+            }
+        ],
+        "ProvisionedThroughput": {
+            "ReadCapacityUnits": 10,
+            "WriteCapacityUnits": 10
+        }
+    },
+    {
+        "TableName": "voting_info",
+        "KeySchema": [
+            {
+                "AttributeName": "election_name",
+                "KeyType": "HASH"
+            }
+        ],
+        "AttributeDefinitions": [
+            {
+                "AttributeName": "election_name",
+                "AttributeType": "S"
+            }
+        ],
+        "ProvisionedThroughput": {
+            "ReadCapacityUnits": 10,
+            "WriteCapacityUnits": 10
+        }
+    }
+]
