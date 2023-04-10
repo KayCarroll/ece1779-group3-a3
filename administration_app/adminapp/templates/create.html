@@ -56,8 +56,12 @@
                 <input type="text" name="voteduration">
             </div>
             <input type="submit" class="submitbutton" id="startvote" value="Start Vote">
-
         </form>
+        <script type="text/javascript">
+            var disable = JSON.parse('{{disable | tojson}}');
+            console.log(disable);
+            document.getElementById("startvote").disabled = disable;
+        </script>
     </div>
 
 </body>

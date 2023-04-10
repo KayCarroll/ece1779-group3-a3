@@ -9,7 +9,9 @@
 </head>
 
 <body>
-    <div class="portalheader"><h1>Voting App Administration Portal</h1></div>
+    <div class="portalheader">
+        <h1>Voting App Administration Portal</h1>
+    </div>
     <div class="topnavbar">
         <a href="home"><i class="fa fa-home"></i></a>
         <a class="active" href="current">Current Vote</a>
@@ -18,6 +20,9 @@
 
     <div class="container">
         <h2>Current vote status</h2>
+        <p>Vote Name: {{vote_name}}</p>
+        <p>Start Time: {{start_time}}</p>
+        <p>End Time: {{end_time}}</p>
         <table>
             <tr>
                 <th>
@@ -29,12 +34,30 @@
                 <th>
                     Association
                 </th>
-                <th>
+                <!-- <th>
                     Votes
-                </th>
+                </th> -->
             </tr>
+            <script type="text/javascript">
+                var candidates = JSON.parse('{{candidates | tojson}}');
+                console.log(candidates)
+                for (var i = 0; i < candidates.length; i++) {
+                    document.write("<tr><td>" + i + "</td>")
+                    document.write("<td>" + candidates[i]["name"] + "</td>")
+                    document.write("<td>" + candidates[i]["association"] + "</td></tr>")
+                    // document.write("<td>" + 0 + "</td></tr>")
+                };
+            </script>
         </table>
-        <button type="button" class="submitbutton" id="endvote">End Vote</button>
+        <form action="http://localhost:5001/end_current_vote" method="post">
+            <input type="hidden" name="votename" value="{{vote_name}}"/>
+            <input type="submit" class="submitbutton" id="endvote" value="End Vote">
+        </form>
+        <script type="text/javascript">
+            var disable = JSON.parse('{{disable | tojson}}');
+            console.log(disable);
+            document.getElementById("endvote").disabled = disable;
+        </script>
     </div>
 
 </body>

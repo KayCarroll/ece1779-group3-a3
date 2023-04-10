@@ -3,7 +3,7 @@ import logging
 
 from boto3.dynamodb.conditions import Key
 from datetime import datetime, timedelta
-from flask import render_template, url_for, request, g
+from flask import redirect, render_template, url_for, request, g
 
 from adminapp import app, dynamodb_client
 from adminapp.constants import LOG_FORMAT, TIME_FORMAT, VOTING_INFO_TABLE
@@ -15,27 +15,66 @@ for module_name in ['botocore', 'urllib3']:
 logger = logging.getLogger(__name__)
 
 
+def get_current_vote():
+    response = dynamodb_client.scan(TableName=VOTING_INFO_TABLE, Select='ALL_ATTRIBUTES',
+                                    FilterExpression='currently_active = :activeval',
+                                    ExpressionAttributeValues={':activeval': {'S': 'True'}})
+    logger.debug(response)
+
+    current_vote = None
+    if len(response['Items']) == 1:
+        current_vote = response['Items'][0]
+    elif response['Items']:
+        logger.warning(f'There is more than one currently active vote!')
+    else:
+        logger.info('There are no currently active votes.')
+
+    return current_vote
+
+
 @app.route('/')
 def main():
     return render_template('main.html')
+
 
 @app.route('/home')
 def home():
     return render_template('main.html')
 
+
 @app.route('/create')
 def create():
-    return render_template('create.html')
+    current_vote = get_current_vote()
+    disable = current_vote is not None
+    return render_template('create.html', disable=disable)
+
 
 @app.route('/current')
 def current():
-    # response = dynamodb_client.query(TableName=VOTING_INFO_TABLE, Select='ALL_ATTRIBUTES',
-    #                                  KeyConditionExpression='currently_active = :activeval',
-    #                                  ExpressionAttributeValues={':activeval': {'S': 'True'}})
-    # logger.info(response)
+    vote_name = ''
+    start_time = ''
+    end_time = ''
+    candidates = []
+    disable = False
 
-    return render_template('current.html')
+    current_vote = get_current_vote()
+    if current_vote:
+        vote_name = current_vote['election_name']['S']
+        start_time = current_vote['start_time']['S']
+        end_time = current_vote['end_time']['S']
+        candidates = list(json.loads(current_vote['candidates']['S']).values())
+        logger.debug(candidates)
+    else:
+        disable = True
 
+    return render_template('current.html', vote_name=vote_name, start_time=start_time,
+                           end_time=end_time, candidates=candidates, disable=disable)
+
+
+@app.route('/end_current_vote', methods=['POST'])
+def end_current_vote():
+    logger.debug(f'End current vote: {request.form["votename"]}')
+    return redirect(url_for('current'))
 
 
 @app.route('/start_new_vote', methods=['POST'])
@@ -67,7 +106,5 @@ def start_new_vote():
                                    'start_time': {'S': start_time.strftime(TIME_FORMAT)},
                                    'end_time': {'S': end_time.strftime(TIME_FORMAT)},
                                    'currently_active': {'S': 'True'}})
-
     logger.info(candidates)
-
-    return render_template('create.html')
+    return redirect(url_for('create'))
