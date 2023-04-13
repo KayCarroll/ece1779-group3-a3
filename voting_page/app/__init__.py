@@ -20,12 +20,12 @@ cloudwatch_client = boto3.client('cloudwatch',
                                  region_name = "us-east-1",
                                  aws_access_key_id=ACCESS_KEY,
                                  aws_secret_access_key=SECRET_KEY)
+
+dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION_NAME)
+dynamodb_client = boto3.client('dynamodb', region_name=AWS_REGION_NAME)
+
 memcache_option = "manual"
 
 from app import main
-from app import memcache_stat
-from app import memcache_config
-from app import tests
-from app import mode_selection
-from app import api
+
 
