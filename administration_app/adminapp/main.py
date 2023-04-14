@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from flask import redirect, render_template, url_for, request
 
 from adminapp import app, dynamodb_client
-from adminapp.constants import LOG_FORMAT, TIME_FORMAT, VOTING_INFO_TABLE
+from adminapp.constants import LOG_FORMAT, TIME_FORMAT, VOTING_INFO_TABLE, CANDIDATE_VOTES_TABLE
 
 logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT, handlers=[logging.StreamHandler()])
 for module_name in ['botocore', 'urllib3']:
@@ -99,6 +99,11 @@ def start_new_vote():
                     candidates[candidate_id]['name'] += f', {val}'
                 elif field_num == '3':
                     candidates[candidate_id]['association'] = val
+
+    for candidate in candidates.values():
+        dynamodb_client.put_item(TableName=CANDIDATE_VOTES_TABLE,
+                                 Item={'candidate_name': {'S': candidate['name']},
+                                       'total_vote': {'N': '0'}})
 
     vote_duration = request.form.get('voteduration').split(':')
     start_time = datetime.utcnow()
