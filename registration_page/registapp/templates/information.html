@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+ <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>Registration Portal</title>
+</head>
+
+<body>
+    <div class="portalheader">
+        <h1>Voting App Registration Portal</h1>
+    </div>
+    <div class="topnavbar">
+        <a href="home"><i class="fa fa-home"></i></a>
+    </div>
+
+    <div class="container">
+        <h2>Enter Your Informations</h2><br>
+        <form name="submit_form" method="POST" enctype="multipart/form-data" onsubmit="return checkform()">
+            <div class="infoinput">
+            
+                <label for="firstname">First Name:</label>
+                <input class="infoinput" input type="text" id="firstname" name="firstname" >
+                <label for="lastname">Last Name:</label>
+                <input class="infoinput" input type="text" id="lastname" name="lastname" ><br><br>
+                <label for="birthday">Birthday(mm/dd/yyyy):</label>
+                <input class="infoinput" input type="text" id="birthday" name="birthday" ><br><br>
+                <label for="address">Address:</label>
+                <input class="infoinput" input type="text" id="address" name="address" ><br><br>
+                <label for="suite">Suite (optional):</label>
+                <input class="infoinput" input type="text" id="suite" name="suite" ><br><br>
+                <label for="city">City:</label>
+                <input class="infoinput" input type="text" id="city" name="city" >
+                <label for="province">Province:</label>
+                <input class="infoinput" input type="text" id="province" name="province" >
+                <label for="postal">Postal code:</label>
+                <input class="infoinput" input type="text" id="postal" name="postal" >
+            </div>
+            
+            <input type="submit" class="submitbutton" id="next" value="Next">
+        </form>
+         <script>
+            function checkform() {
+              if(document.getElementById("firstname").value == "" ) {
+                  alert("Please enter your first name");
+                  return false;
+              
+              }else if(document.getElementById("lastname").value == "" ) {
+                   alert("Please enter your last name");
+                   return false;
+               
+               }else if(document.getElementById("birthday").value == "" ) {
+                    alert("Please enter your birthday");
+                    return false;
+                
+                }else if(document.getElementById("address").value == "" ) {
+                     alert("Please enter your address");
+                     return false;
+                 
+                 }else if(document.getElementById("city").value == "" ) {
+                      alert("Please enter your city");
+                      return false;
+                  }else if(document.getElementById("province").value == "" ) {
+                       alert("Please enter your province");
+                       return false;
+                   }else if(document.getElementById("postal").value == "" ) {
+                        alert("Please enter your postal!");
+                        return false;
+                    }    else {
+                  document.submit_form.submit();
+              }
+            }
+          </script>
+    </div>
+
+</body>
+
+</html>
