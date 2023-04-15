@@ -45,6 +45,12 @@
     float: right;
 }
 
-.voteinfotable td {
-    padding: 10px;
+.voteinfotable {
+    width: 100%;
+}
+
+.voteinfotable td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
 }

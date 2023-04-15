@@ -3,6 +3,7 @@
 
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="60">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <title>Voting Admin Portal</title>
@@ -26,26 +27,22 @@
         <table class="voteinfotable">
             <tr>
                 <th>
-                    Candidate #
-                </th>
-                <th>
-                    Name
+                    Candidate Name
                 </th>
                 <th>
                     Association
                 </th>
-                <!-- <th>
+                <th>
                     Votes
-                </th> -->
+                </th>
             </tr>
             <script type="text/javascript">
                 var candidates = JSON.parse('{{candidates | tojson}}');
                 console.log(candidates)
                 for (var i = 0; i < candidates.length; i++) {
-                    document.write("<tr><td>" + i + "</td>")
-                    document.write("<td>" + candidates[i]["name"] + "</td>")
-                    document.write("<td>" + candidates[i]["association"] + "</td></tr>")
-                    // document.write("<td>" + 0 + "</td></tr>")
+                    document.write("<tr><td>" + candidates[i]["name"] + "</td>")
+                    document.write("<td>" + candidates[i]["association"] + "</td>")
+                    document.write("<td>" + candidates[i]["total_vote"] + "</td></tr>")
                 };
             </script>
         </table>

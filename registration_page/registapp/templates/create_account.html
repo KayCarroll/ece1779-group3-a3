@@ -34,7 +34,7 @@
                 <input class="accountinput" input type="password" id="password" name="password"><br><br>
                 <label for="password2">Confirm Password:</label>
                 <input class="accountinput" input type="password" id="password2" name="password2"><br><br>
-                <input type="checkbox" onclick="togglePassword()"> Show Password
+                <input type="checkbox" onclick="toggle_password()"> Show Password
             </div>
 
             <input type="submit" class="submitbutton" id="next_info" value="Next">
@@ -58,7 +58,7 @@
                 }
             }
             
-            function togglePassword() {
+            function toggle_password() {
                 var password = document.getElementById("password");
                 if (password.type === "password") {
                     password.type = "text";

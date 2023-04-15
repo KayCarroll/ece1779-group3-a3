@@ -31,6 +31,19 @@ def get_current_vote():
     return current_vote
 
 
+def get_candidate_votes(candidates):
+    for candidate in candidates:
+        response = dynamodb_client.query(TableName=CANDIDATE_VOTES_TABLE,
+                                         ExpressionAttributeValues={':name': {'S': candidate['name']}},
+                                         KeyConditionExpression='candidate_name = :name')
+        if response['Items']:
+            candidate['total_vote'] = response['Items'][0]['total_vote']['N']
+        else:
+            logger.warning(f'No entry in the candidate votes table found for candidate {candidate["name"]}')
+            candidate['total_vote'] = 0
+    return candidates
+
+
 @app.route('/')
 def main():
     return render_template('main.html')
@@ -62,7 +75,8 @@ def current():
         start_time = current_vote['start_time']['S']
         end_time = current_vote['end_time']['S']
         candidates = list(json.loads(current_vote['candidates']['S']).values())
-        logger.debug(candidates)
+        candidates = get_candidate_votes(candidates)
+        logger.debug(f'candidates: {candidates}')
     else:
         disable = True
 
@@ -72,7 +86,7 @@ def current():
 
 @app.route('/end_current_vote', methods=['POST'])
 def end_current_vote():
-    election_name = request.form["votename"]
+    election_name = request.form['votename']
     end_time = datetime.utcnow().strftime(TIME_FORMAT)
     response = dynamodb_client.update_item(TableName=VOTING_INFO_TABLE,
                                            Key={'election_name': {'S': election_name}},
