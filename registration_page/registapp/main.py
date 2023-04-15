@@ -1,9 +1,9 @@
 import json
 import logging
-
+import hashlib
 from datetime import datetime, timedelta
 from flask import redirect, render_template, url_for, request
-
+from flask import session
 from registapp import app, dynamodb_client
 from registapp.constants import LOG_FORMAT, TIME_FORMAT, VOTING_INFO_TABLE, CANDIDATE_VOTES_TABLE
 
@@ -14,16 +14,21 @@ for module_name in ['botocore', 'urllib3']:
 logger = logging.getLogger(__name__)
 
 
+salt = "ece1779"
+input_username=''
+input_password=''
+import secrets
 
+app.secret_key = secrets.token_hex(16)
 
 @app.route('/')
 def main():
-    return render_template('main.html', return_addr='/information')
+    return render_template('main.html', return_addr='/create_account')
 
 
 @app.route('/home')
 def home():
-    return render_template('main.html' , return_addr='/information')
+    return render_template('main.html' , return_addr='/create_account')
 
 
 @app.route('/information')
@@ -31,6 +36,23 @@ def information():
 
     return render_template('information.html')
 
+@app.route('/create_account')
+def account():
+
+    return render_template('create_account.html')
+
+@app.route('/create_account', methods=['POST'])
+def create_account():
+    global input_username
+    global input_password
+    input_username=request.form.get("username")
+    input_password=request.form.get("password")
+    #with open('test.txt', 'w') as f:
+      #  f.write(input_username)
+     #   f.write('\n')
+      #  f.write(input_password)
+       # f.write('\n')
+    return redirect(url_for('information'))
 
 @app.route('/information', methods=['POST'])
 def next_step():
@@ -43,7 +65,19 @@ def next_step():
     city = request.form.get("city")
     province = request.form.get("province")
     postal = request.form.get("postal")
-    with open('readme.txt', 'w') as f:
+    
+
+    with open('test2.txt', 'w') as f:
+       
+        f.write(input_username)
+        f.write('\n')
+        f.write(input_password)
+        f.write('\n')
+    
+    fullname=firstname+lastname
+    
+    
+    with open(input_username+'.txt', 'w') as f:
        
         f.write(firstname)
         f.write('\n')
@@ -61,6 +95,8 @@ def next_step():
         f.write('\n')
         f.write(postal)
         f.write('\n')
+
+    hashed_pass_db = password_hashing(input_password)
    # db_con =  get_db()
    # cursor= db_con.cursor()
    # #Check the key is not duplicate, if it is, replace the old file
@@ -96,3 +132,9 @@ def next_step():
 
 
     return render_template('message.html', user_message="Your image has been uploaded successfully!", return_addr='/home')
+
+def password_hashing(password):
+    dataBase_password = password + salt
+    hashed_password = hashlib.md5(dataBase_password.encode())
+    return hashed_password.hexdigest()
+
