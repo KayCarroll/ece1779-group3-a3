@@ -8,7 +8,9 @@ TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 VOTING_INFO_TABLE = 'voting_info'
 CANDIDATE_VOTES_TABLE = 'Candidate_Votes'
 AWS_REGION_NAME = 'us-east-1'
+END_VOTE_LAMBDA = 'endVoteTestFunc'
 dynamodb_client = boto3.client('dynamodb', region_name=AWS_REGION_NAME)
+events_client = boto3.client('events', region_name=AWS_REGION_NAME)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -26,6 +28,12 @@ def get_vote(vote_name):
         logger.warning(f'No vote found with name {vote_name}')
     return vote_info
 
+
+def clean_up(rule_name):
+    dynamodb_client.close()
+    res = events_client.remove_targets(Rule=rule_name, Ids=[END_VOTE_LAMBDA])
+    events_client.delete_rule(Name=rule_name)
+    events_client.close()
 
 
 def lambda_handler(event, context):
@@ -45,6 +53,9 @@ def lambda_handler(event, context):
         else:
             end_time = vote_info['end_time']['S']
             logger.info(f'Vote {vote_name} already ended at {end_time}')
+            
+    rule_name = event['rule_name']
+    clean_up(rule_name)
 
     return {'statusCode': 200,
             'body': json.dumps(f'Vote {vote_name} ended')}

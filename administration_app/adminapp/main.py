@@ -106,8 +106,10 @@ def schedule_end_vote(vote_name, end_time):
     lambda_client.add_permission(FunctionName=END_VOTE_LAMBDA, StatementId=f'{rule_name}-Event',
                                  Action='lambda:InvokeFunction', Principal='events.amazonaws.com',
                                  SourceArn=res['RuleArn'])
+
+    target_input = json.dumps({'vote_name': vote_name, 'rule_name': rule_name})
     res = events_client.put_targets(Rule=rule_name, Targets=[{'Id': END_VOTE_LAMBDA, 'Arn': LAMBDA_ARN,
-                                                              'Input': json.dumps({'vote_name': vote_name})}])
+                                                              'Input': target_input}])
 
 
 @app.route('/start_new_vote', methods=['POST'])
