@@ -18,31 +18,37 @@
         <a href="home"><i class="fa fa-home"></i></a>
     </div>
 
+    {% if error_message %}
+    <div class="alert alert-danger">
+        {{ error_message }}
+    </div>
+    {% endif %}
+
     <div class="container">
         <h2>Enter Your Informations</h2><br>
         <form name="create_account" method="POST" enctype="multipart/form-data" onsubmit="return checkcreate()">
             <div class="accountinput">
-                 <label for="username">User Name:</label>
-                 <input class="accountinput" input type="text" id="username" name="username" ><br><br>
-                 <label for="password">Password:</label>
-                 <input class="accountinput" input type="text" id="password" name="password" >
+                <label for="username">User Name:</label>
+                <input class="accountinput" input type="text" id="username" name="username"><br><br>
+                <label for="password">Password:</label>
+                <input class="accountinput" input type="text" id="password" name="password">
             </div>
-            
+
             <input type="submit" class="submitbutton" id="next_info" value="Next">
         </form>
-         <script>
+        <script>
             function checkcreate() {
-                    if(document.getElementById("username").value == "" ) {
-                        alert("Please enter your username!");
-                        return false;
-                    } else if(document.getElementById("password").value == "" ) {
-                         alert("Please enter your password!");
-                         return false;
-                     }     else {
-                  document.create_account.submit();
-              }
+                if (document.getElementById("username").value == "") {
+                    alert("Please enter your username!");
+                    return false;
+                } else if (document.getElementById("password").value == "") {
+                    alert("Please enter your password!");
+                    return false;
+                } else {
+                    document.create_account.submit();
+                }
             }
-          </script>
+        </script>
     </div>
 
 </body>

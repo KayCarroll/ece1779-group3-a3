@@ -15,7 +15,9 @@ for module_name in ['botocore', 'urllib3']:
     logging.getLogger(module_name).setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
-dynamodb_client = boto3.client('dynamodb', region_name=AWS_REGION_NAME)
+ACCESS_KEY = "AKIARYPZNG6KRLLMQZ3X"
+SECRET_KEY = "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"
+dynamodb_client = boto3.client('dynamodb', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=AWS_REGION_NAME)
 
 
 def get_tables_config():
