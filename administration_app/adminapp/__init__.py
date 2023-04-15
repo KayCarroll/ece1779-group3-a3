@@ -15,6 +15,8 @@ for module_name in ['botocore', 'urllib3']:
 
 logger = logging.getLogger(__name__)
 dynamodb_client = boto3.client('dynamodb', region_name=AWS_REGION_NAME)
+events_client = boto3.client('events', region_name=AWS_REGION_NAME)
+lambda_client = boto3.client('lambda', region_name=AWS_REGION_NAME)
 
 app = Flask(__name__)
 
@@ -22,6 +24,10 @@ app = Flask(__name__)
 def close_client():
     dynamodb_client.close()
     logger.info(f'Closed DynamoDB client')
+    events_client.close()
+    logger.info(f'Closed Events client')
+    lambda_client.close()
+    logger.info(f'Closed Lambda client')
 
 
 atexit.register(close_client)

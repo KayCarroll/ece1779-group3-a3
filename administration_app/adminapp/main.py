@@ -4,8 +4,9 @@ import logging
 from datetime import datetime, timedelta
 from flask import redirect, render_template, url_for, request
 
-from adminapp import app, dynamodb_client
-from adminapp.constants import LOG_FORMAT, TIME_FORMAT, VOTING_INFO_TABLE, CANDIDATE_VOTES_TABLE
+from adminapp import app, dynamodb_client, events_client, lambda_client
+from adminapp.constants import (LOG_FORMAT, TIME_FORMAT, VOTING_INFO_TABLE,
+                                CANDIDATE_VOTES_TABLE, END_VOTE_LAMBDA, LAMBDA_ARN)
 
 logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT, handlers=[logging.StreamHandler()])
 for module_name in ['botocore', 'urllib3']:
@@ -97,6 +98,18 @@ def end_current_vote():
     return redirect(url_for('current'))
 
 
+def schedule_end_vote(vote_name, end_time):
+    rule_name = f'endVote{vote_name.replace(" ", "")}'
+    logger.info('New rule name: {rule_name}')
+    schedule_end_cron_str = f'cron({end_time.minute} {end_time.hour} {end_time.day} {end_time.month} ? {end_time.year})'
+    res = events_client.put_rule(Name=rule_name, ScheduleExpression=schedule_end_cron_str, State='ENABLED')
+    lambda_client.add_permission(FunctionName=END_VOTE_LAMBDA, StatementId=f'{rule_name}-Event',
+                                 Action='lambda:InvokeFunction', Principal='events.amazonaws.com',
+                                 SourceArn=res['RuleArn'])
+    res = events_client.put_targets(Rule=rule_name, Targets=[{'Id': END_VOTE_LAMBDA, 'Arn': LAMBDA_ARN,
+                                                              'Input': json.dumps({'vote_name': vote_name})}])
+
+
 @app.route('/start_new_vote', methods=['POST'])
 def start_new_vote():
     candidates = {}
@@ -122,14 +135,15 @@ def start_new_vote():
     vote_duration = request.form.get('voteduration').split(':')
     start_time = datetime.utcnow()
     end_time = start_time + timedelta(hours=int(vote_duration[0]),
-                                      minutes=int(vote_duration[1]),
-                                      seconds=int(vote_duration[2]))
+                                      minutes=int(vote_duration[1]))
 
+    vote_name = request.form.get('votename')
     dynamodb_client.put_item(TableName=VOTING_INFO_TABLE,
-                             Item={'election_name': {'S': request.form.get('votename')},
+                             Item={'election_name': {'S': vote_name},
                                    'candidates': {'S': json.dumps(candidates)},
                                    'start_time': {'S': start_time.strftime(TIME_FORMAT)},
                                    'end_time': {'S': end_time.strftime(TIME_FORMAT)},
                                    'currently_active': {'S': 'True'}})
     logger.info(candidates)
+    schedule_end_vote(vote_name, end_time)
     return redirect(url_for('create'))
