@@ -7,8 +7,8 @@ from pathlib import Path
 import io
 import base64
 import mysql.connector
-from app import dynamodb, dynamodb_client
-from app.config_variables import db_config, VOTING_INFO_TABLE, VOTER_INFO_TABLE
+from app import dynamodb, dynamodb_client, s3_client
+from app.config_variables import db_config, VOTING_INFO_TABLE, VOTER_INFO_TABLE, salt, S3_bucket_name
 import os
 import glob
 
@@ -17,6 +17,8 @@ from plotly.offline import plot
 import plotly.express as px
 import plotly.graph_objs as go
 from flask import Markup
+import secrets
+import hashlib
 
 def connect_to_database():
     return mysql.connector.connect(user=db_config['user'],
@@ -52,6 +54,11 @@ def get_current_vote():
 
     return current_vote
 
+def password_hashing(password):
+    dataBase_password = password + salt
+    hashed_password = hashlib.md5(dataBase_password.encode())
+    return hashed_password.hexdigest()
+
 def verify_voter(voter_name, password):
     if not voter_name:
         return False
@@ -59,15 +66,13 @@ def verify_voter(voter_name, password):
     response = table.get_item( Key={ 'voter_name': voter_name } )
     if 'Item' in response:
         voter_info = response['Item']
-        if voter_info['password'] == password:
-            return True
+        hashed_pass = password_hashing(password)
+        if voter_info['password'] == hashed_pass:
+            return True, voter_info
         else:
-            return False
+            return False, None
     else:
-        return False
-    # response = dynamodb_client.scan(TableName=VOTING_INFO_TABLE, Select='ALL_ATTRIBUTES',
-    #                                 FilterExpression='currently_active = :activeval',
-    #                                 ExpressionAttributeValues={':activeval': {'S': 'True'}})
+        return False, None
 
 @webapp.route('/')
 def main():
@@ -98,11 +103,34 @@ def vote_page():
 def handle_vote():
     user_name = request.form["voter_name"]
     password = request.form["voter_passwd"]
-    if verify_voter(user_name, password):
+    (voter_verified, voter_info) = verify_voter(user_name, password)
+    if voter_verified:
         candidate_choice = request.form.get('candidate_options')
         if not candidate_choice:
             return render_template("message.html", user_message = "No Candidate Selected.", return_addr = "vote")
-        return render_template("message.html", user_message = "Candidate selected: " + candidate_choice, return_addr = "vote")
+        # TODO: gather the info from S3 and display
+        s3_path = voter_info["voter_info"]
+        try:
+            s3_response = s3_client.get_object(
+                Bucket=S3_bucket_name,
+                Key=s3_path
+            )
+        except Exception as e:
+            print(e)
+            return render_template("message.html", user_message = e, return_addr = "vote")
+        s3_object_body = s3_response.get('Body')
+        content_str = s3_object_body.read().decode()
+        info_list = content_str.split("\n")
+        result_list = ["First Name: " + info_list[0],
+                       "Last Name: " + info_list[1],
+                       "Birthday: " + info_list[2],
+                       "Street Address: " + info_list[3],
+                       "Unit Number: " + info_list[4],
+                       "City: " + info_list[5],
+                       "Province: " + info_list[6],
+                       "Postal Code: " + info_list[7]]
+        # TODO: call Lambda function to increment vote.
+        return render_template("message.html", list_title = "Your information: ", input_list=result_list, user_message="Candidate Selected: " + candidate_choice, return_addr = "vote")
     else:
         return render_template("message.html", user_message = "Your credential did not match our database.", return_addr = "vote")
 
@@ -112,14 +140,21 @@ def handle_vote():
 def create_voter():
     username = request.args.get('username')
     password = request.args.get('password')
+    hashed_passwd = password_hashing(password)
+    print("Hashed Password: " + hashed_passwd)
     table = dynamodb.Table(VOTER_INFO_TABLE)
     response = table.put_item(
         Item={
             'voter_name': username,
-            'password': password,
+            'password': hashed_passwd   ,
             "voter_info": f"voterinfo/{username}.txt"
         }
     )
+    try:
+        response = s3_client.upload_file(Filename="amy.txt", Bucket=S3_bucket_name, Key=f"voterinfo/{username}.txt")
+    except Exception as e:
+        print(e)
+        return render_template("message.html", user_message = "S3 Upload failed.", return_addr = "vote")
     return render_template("message.html", user_message = "Candidate created: " + username + " password: " + password, return_addr = "vote")
 
 @webapp.route('/verify_voter', methods=['GET'])
@@ -127,4 +162,4 @@ def verify_voter_handle():
     username = request.args.get('username')
     password = request.args.get('password')
     result = verify_voter(username, password)
-    return render_template("message.html", user_message = "Voter verified: " + str(result), return_addr = "vote")
+    return render_template("message.html", user_message = "Voter verified: " + str(result[0]), return_addr = "vote")

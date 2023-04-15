@@ -16,3 +16,6 @@ manager_base_url = "http://127.0.0.1:5001"
 auto_scaler_base_url = "http://127.0.0.1:5002"
 
 CLOUDWATCH_NAMESPACE = "MemCache Metrics 2"
+
+# password related
+salt = "ece1779"
