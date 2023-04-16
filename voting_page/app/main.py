@@ -7,8 +7,8 @@ from pathlib import Path
 import io
 import base64
 import mysql.connector
-from app import dynamodb, dynamodb_client, s3_client
-from app.config_variables import db_config, VOTING_INFO_TABLE, VOTER_INFO_TABLE, salt, S3_bucket_name
+from app import dynamodb, dynamodb_client, s3_client, lambda_client
+from app.config_variables import VOTING_INFO_TABLE, VOTER_INFO_TABLE, salt, S3_bucket_name
 import os
 import glob
 
@@ -20,24 +20,6 @@ from flask import Markup
 import secrets
 import hashlib
 
-def connect_to_database():
-    return mysql.connector.connect(user=db_config['user'],
-                                   password=db_config['password'],
-                                   host=db_config['host'],
-                                   database=db_config['database'])
-
-def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = connect_to_database()
-    return db
-
-
-@webapp.teardown_appcontext
-def teardown_db(exception):
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
 
 def get_current_vote():
     response = dynamodb_client.scan(TableName=VOTING_INFO_TABLE, Select='ALL_ATTRIBUTES',
@@ -92,7 +74,6 @@ def vote_page():
         start_time = current_vote['start_time']['S']
         end_time = current_vote['end_time']['S']
         candidates = list(json.loads(current_vote['candidates']['S']).values())
-        print(candidates)
     else:
         print("No active vote")
         disable = True
@@ -130,6 +111,16 @@ def handle_vote():
                        "Province: " + info_list[6],
                        "Postal Code: " + info_list[7]]
         # TODO: call Lambda function to increment vote.
+        test_event = {"body": {
+            "candidate": candidate_choice
+            }
+        }
+        response = lambda_client.invoke(
+            FunctionName='updateCandidateVote',
+            Payload=json.dumps(test_event),
+        )
+        response_payload = json.loads(response['Payload'].read())
+        print(response_payload)
         return render_template("message.html", list_title = "Your information: ", input_list=result_list, user_message="Candidate Selected: " + candidate_choice, return_addr = "vote")
     else:
         return render_template("message.html", user_message = "Your credential did not match our database.", return_addr = "vote")
