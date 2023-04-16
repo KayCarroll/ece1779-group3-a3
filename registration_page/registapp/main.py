@@ -88,7 +88,8 @@ def next_step():
         Item={
             'voter_name': input_username,
             'password': hashed_pass_db,
-            "voter_info": f"voterinfo/{input_username}.txt"
+            "voter_info": f"voterinfo/{input_username}.txt",
+            "already_voted": "False"
         }
     )
 

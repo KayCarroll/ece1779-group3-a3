@@ -88,8 +88,8 @@ def handle_vote():
         candidate_choice = request.form.get('candidate_options')
         if not candidate_choice:
             return render_template("message.html", user_message = "No Candidate Selected.", return_addr = "vote")
-        # TODO: gather the info from S3 and display
         s3_path = voter_info["voter_info"]
+        already_voted = voter_info["already_voted"]
         try:
             s3_response = s3_client.get_object(
                 Bucket=S3_bucket_name,
@@ -109,7 +109,13 @@ def handle_vote():
                        "City: " + info_list[5],
                        "Province: " + info_list[6],
                        "Postal Code: " + info_list[7]]
-        # TODO: call Lambda function to increment vote.
+        if already_voted == "True":
+            return render_template("message.html", list_title = "Your information: ", input_list=result_list, user_message="You have already voted! The vote is not collected!", return_addr = "vote")
+        else:
+            response = dynamodb_client.update_item(TableName=VOTER_INFO_TABLE,
+                                           Key={'voter_name': {'S': user_name}},
+                                           ExpressionAttributeValues={':av': {'S': "True"}},
+                                           UpdateExpression=f'SET already_voted = :av')
         test_event = {"body": {
             "candidate": candidate_choice
             }
@@ -119,7 +125,6 @@ def handle_vote():
             Payload=json.dumps(test_event),
         )
         response_payload = json.loads(response['Payload'].read())
-        print(response_payload)
         return render_template("message.html", list_title = "Your information: ", input_list=result_list, user_message="Candidate Selected: " + candidate_choice, return_addr = "vote")
     else:
         return render_template("message.html", user_message = "Your credential did not match our database.", return_addr = "vote")
