@@ -20,6 +20,9 @@
             <div class="input-group mb-3">
                 <input class="form-control w-50" type="password" id="voter_passwd_field" name="voter_passwd"/>
             </div>
+            <div class="input-group mb-3">
+                <input type="checkbox" onclick="toggle_password()"> Show Password
+            </div>
             <p class="text-center">Select Candidate Choice:</p>
             {% for key in candidate_list %}
                 <div class="form-check">
@@ -34,9 +37,6 @@
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 
-    <form name="another_form" method="POST">
-        <input type="submit" class="btn btn-outline-primary" name="switch_to_manual" value="Switch to Manual Control">
-    </form>
 
 
     <script>
@@ -73,6 +73,15 @@
           document.submit_form.submit();
       }
     }
+      function toggle_password() {
+          var password = document.getElementById("voter_passwd_field");
+          if (password.type === "password") {
+              password.type = "text";
+          } else {
+              password.type = "password";
+          }
+         
+      }
     </script>
 
     <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script> -->
