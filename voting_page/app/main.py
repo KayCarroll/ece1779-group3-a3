@@ -8,7 +8,7 @@ import io
 import base64
 import mysql.connector
 from app import dynamodb, dynamodb_client, s3_client, lambda_client
-from app.config_variables import VOTING_INFO_TABLE, VOTER_INFO_TABLE, salt, S3_bucket_name
+from app.config_variables import VOTING_INFO_TABLE, VOTER_INFO_TABLE, salt, S3_bucket_name, LAMBDA_UPDATE_VOTE_FUNCTION
 import os
 import glob
 
@@ -75,8 +75,7 @@ def vote_page():
         end_time = current_vote['end_time']['S']
         candidates = list(json.loads(current_vote['candidates']['S']).values())
     else:
-        print("No active vote")
-        disable = True
+        return render_template("message.html", user_message = "There is no active vote.", return_addr = "vote")
 
     return render_template("vote.html", candidate_list = candidates)
 
@@ -116,7 +115,7 @@ def handle_vote():
             }
         }
         response = lambda_client.invoke(
-            FunctionName='updateCandidateVote',
+            FunctionName=LAMBDA_UPDATE_VOTE_FUNCTION,
             Payload=json.dumps(test_event),
         )
         response_payload = json.loads(response['Payload'].read())
