@@ -4,7 +4,7 @@ import logging
 
 from flask import Flask
 
-from adminapp.constants import AWS_REGION_NAME, LOG_FORMAT
+from adminapp.constants import AWS_REGION_NAME, LOG_FORMAT, ACCESS_KEY, SECRET_KEY
 
 AWS_REGION_NAME = 'us-east-1'
 LOG_FORMAT = '%(asctime)s - %(name)s - [%(levelname)s] - %(message)s'
