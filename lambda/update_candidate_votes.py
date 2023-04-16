@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 def lambda_handler(event, context):
 
     # logger.warning(f'event: {event}')
-    candidate = json.loads(event['body'])['candidate']
+    candidate = event['body']['candidate']
     logger.info(f'Received request to add vote for candidate {candidate}')
     res = dynamodb_client.update_item(TableName=CANDIDATE_VOTES_TABLE,
                                       Key={'candidate_name': {'S': candidate}},
