@@ -45,6 +45,33 @@ def get_candidate_votes(candidates):
     return candidates
 
 
+def get_past_votes():
+    response = dynamodb_client.scan(TableName=VOTING_INFO_TABLE, Select='ALL_ATTRIBUTES',
+                                    FilterExpression='currently_active = :activeval',
+                                    ExpressionAttributeValues={':activeval': {'S': 'False'}})
+
+    past_votes = []
+    for vote in response['Items']:
+        past_votes.append({'election_name': vote['election_name']['S'],
+                           'start_time':  vote['start_time']['S'],
+                           'end_time':  vote['end_time']['S']})
+    past_votes.sort(key=lambda x:datetime.strptime(x['start_time'], TIME_FORMAT), reverse=True)
+    return past_votes
+
+
+def get_vote(vote_name):
+    response = dynamodb_client.query(TableName=VOTING_INFO_TABLE,
+                                     ExpressionAttributeValues={':name': {'S': vote_name}},
+                                     KeyConditionExpression='election_name = :name')
+
+    vote_info = None
+    if response['Items']:
+        vote_info = response['Items'][0]
+    else:
+        logger.warning(f'No vote found with name {vote_name}')
+    return vote_info
+
+
 @app.route('/')
 def main():
     return render_template('main.html')
@@ -149,3 +176,29 @@ def start_new_vote():
     logger.info(candidates)
     schedule_end_vote(vote_name, end_time)
     return redirect(url_for('create'))
+
+
+@app.route('/past')
+def past():
+    past_votes = get_past_votes()
+    logger.info(f'past_votes: {past_votes}')
+    return render_template('past.html', past_votes=past_votes)
+
+
+@app.route('/results', methods=['POST'])
+def results():
+    vote_name = request.form['votename']
+    start_time = ''
+    end_time = ''
+    candidates = []
+
+    current_vote = get_vote(vote_name)
+    if current_vote:
+        start_time = current_vote['start_time']['S']
+        end_time = current_vote['end_time']['S']
+        candidates = list(json.loads(current_vote['candidates']['S']).values())
+        candidates = get_candidate_votes(candidates)
+        logger.debug(f'candidates: {candidates}')
+
+    return render_template('results.html', vote_name=vote_name, start_time=start_time,
+                           end_time=end_time, candidates=candidates)

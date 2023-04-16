@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Voting Admin Portal</title>
+</head>
+
+<body>
+    <div class="portalheader">
+        <h1>Voting App Administration Portal</h1>
+    </div>
+    <div class="topnavbar">
+        <a href="home"><i class="fa fa-home"></i></a>
+        <a href="current">Current Vote</a>
+        <a href="create">New Vote</a>
+        <a class="active" href="past">Past Votes</a>
+    </div>
+
+    <div class="container">
+        <h2>Past votes</h2>
+        <table class="voteinfotable">
+            <tr>
+                <th>
+                    Vote Name
+                </th>
+                <th>
+                    Start Time
+                </th>
+                <th>
+                    End Time
+                </th>
+                <th>
+                    Action
+                </th>
+            </tr>
+            <script type="text/javascript">
+                var past_votes = JSON.parse('{{past_votes | tojson}}');
+                for (var i = 0; i < past_votes.length; i++) {
+                    var vote_name = past_votes[i]["election_name"]
+                    document.write("<tr><td>" + vote_name + "</td>")
+                    document.write("<td>" + past_votes[i]["start_time"] + "</td>")
+                    document.write("<td>" + past_votes[i]["end_time"] + "</td>")
+                    document.write("<td><form action=\"http://localhost:5001/results\" method=\"post\">" +
+                                   "<input type=\"hidden\" name=\"votename\" value=\"" + vote_name + "\"/>" +
+                                   "<input type=\"submit\" class=\"submitbutton\" id=\"viewresults\" value=\"View Results\">" +
+                                   "</form></td></tr>")
+                };
+            </script>
+        </table>
+    </div>
+
+</body>
+
+</html>
