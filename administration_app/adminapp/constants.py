@@ -4,4 +4,6 @@ TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 VOTING_INFO_TABLE = 'voting_info'
 CANDIDATE_VOTES_TABLE = 'Candidate_Votes'
 END_VOTE_LAMBDA = 'endVoteTestFunc'
-LAMBDA_ARN = 'arn:aws:lambda:us-east-1:620370720330:function:endVoteTestFunc'
+LAMBDA_ARN = 'arn:aws:lambda:us-east-1:121319012245:function:endVoteTestFunc'
+ACCESS_KEY = "AKIARYPZNG6KRLLMQZ3X"
+SECRET_KEY = "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"

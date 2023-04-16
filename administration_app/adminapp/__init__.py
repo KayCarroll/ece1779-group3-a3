@@ -14,9 +14,11 @@ for module_name in ['botocore', 'urllib3']:
     logging.getLogger(module_name).setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
-dynamodb_client = boto3.client('dynamodb', region_name=AWS_REGION_NAME)
-events_client = boto3.client('events', region_name=AWS_REGION_NAME)
-lambda_client = boto3.client('lambda', region_name=AWS_REGION_NAME)
+
+
+dynamodb_client = boto3.client('dynamodb',aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=AWS_REGION_NAME)
+events_client = boto3.client('events',aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=AWS_REGION_NAME)
+lambda_client = boto3.client('lambda',aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=AWS_REGION_NAME)
 
 app = Flask(__name__)
 
