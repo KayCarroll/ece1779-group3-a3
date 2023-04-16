@@ -15,7 +15,7 @@ for module_name in ['botocore', 'urllib3']:
 
 logger = logging.getLogger(__name__)
 
-
+dynamodb_resource = boto3.resource('dynamodb', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=AWS_REGION_NAME)
 dynamodb_client = boto3.client('dynamodb',aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=AWS_REGION_NAME)
 events_client = boto3.client('events',aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=AWS_REGION_NAME)
 lambda_client = boto3.client('lambda',aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=AWS_REGION_NAME)

@@ -1,12 +1,13 @@
 import json
 import logging
+import boto3
 
 from datetime import datetime, timedelta
 from flask import redirect, render_template, url_for, request
 
-from adminapp import app, dynamodb_client, events_client, lambda_client
-from adminapp.constants import (LOG_FORMAT, TIME_FORMAT, VOTING_INFO_TABLE,
-                                CANDIDATE_VOTES_TABLE, END_VOTE_LAMBDA, LAMBDA_ARN)
+from adminapp import app, dynamodb_client, events_client, lambda_client, dynamodb_resource
+from adminapp.constants import (AWS_REGION_NAME, LOG_FORMAT, TIME_FORMAT, VOTING_INFO_TABLE,
+                                CANDIDATE_VOTES_TABLE, VOTER_DATA_TABLE, END_VOTE_LAMBDA, LAMBDA_ARN)
 
 logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT, handlers=[logging.StreamHandler()])
 for module_name in ['botocore', 'urllib3']:
@@ -71,6 +72,18 @@ def get_vote(vote_name):
         logger.warning(f'No vote found with name {vote_name}')
     return vote_info
 
+def remove_all_registered_voters():
+    
+    table = dynamodb_resource.Table(VOTER_DATA_TABLE)
+
+    scan = table.scan()
+    with table.batch_writer() as batch:
+        for each in scan['Items']:
+            print("EACH: ")
+            print(each)
+            batch.delete_item(Key={
+                "voter_name": each["voter_name"]
+            })
 
 @app.route('/')
 def main():
@@ -141,6 +154,7 @@ def schedule_end_vote(vote_name, end_time):
 
 @app.route('/start_new_vote', methods=['POST'])
 def start_new_vote():
+    remove_all_registered_voters()
     candidates = {}
     for key, val in request.form.items():
         if '-' in key:
@@ -175,6 +189,7 @@ def start_new_vote():
                                    'currently_active': {'S': 'True'}})
     logger.info(candidates)
     schedule_end_vote(vote_name, end_time)
+    remove_all_registered_voters()
     return redirect(url_for('create'))
 
 

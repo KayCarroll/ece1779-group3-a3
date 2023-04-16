@@ -3,6 +3,7 @@ LOG_FORMAT = '%(asctime)s - %(name)s - [%(levelname)s] - %(message)s'
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 VOTING_INFO_TABLE = 'voting_info'
 CANDIDATE_VOTES_TABLE = 'Candidate_Votes'
+VOTER_DATA_TABLE = 'voter_data'
 END_VOTE_LAMBDA = 'endVoteTestFunc'
 LAMBDA_ARN = 'arn:aws:lambda:us-east-1:121319012245:function:endVoteTestFunc'
 ACCESS_KEY = "AKIARYPZNG6KRLLMQZ3X"
